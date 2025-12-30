@@ -32,10 +32,13 @@ public class NominatimGeocodingService {
     }
 
     /**
-     * Internal DTO to map the JSON response from Nominatim.
+     * Internal DTOs to map the JSON response from Nominatim.
      */
     @JsonIgnoreProperties(ignoreUnknown = true)
     record NominatimResult(String lat, String lon) {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    record NominatimReverseResult(String display_name) {}
 
     /**
      * Retrieves the coordinates for a given address.
@@ -80,4 +83,41 @@ public class NominatimGeocodingService {
         }
         return Optional.empty();
     }
+
+    /**
+     * Retrieves the address for given coordinates.
+     */
+    public Optional<String> getAddress(double lat, double lon) {
+        try {
+            String searchUrl = nominatimProperties.getUrl();
+            String reverseUrl = searchUrl.replace("search", "reverse");
+
+            URI url = UriComponentsBuilder.fromUriString(reverseUrl)
+                    .queryParam("lat",lat)
+                    .queryParam("lon",lon)
+                    .queryParam("format","json")
+                    .build()
+                    .toUri();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("User-Agent", nominatimProperties.getUserAgent());
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<NominatimReverseResult> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    entity,
+                    NominatimReverseResult.class
+            );
+
+            if (response.getBody()!=null && response.getBody().display_name()!=null){
+                LOGGER.debug("Reverse geocoding result: {}", response.getBody().display_name());
+                return Optional.of(response.getBody().display_name());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to reverse geocode lat: {},lon: {}", lat, lon, e);
+        }
+        return Optional.empty();
+    }
+
 }

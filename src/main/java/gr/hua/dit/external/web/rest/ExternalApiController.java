@@ -30,6 +30,8 @@ public class ExternalApiController {
         this.openRouteService = openRouteService;
     }
 
+    public record AddressResult(String address){}
+
     @PostMapping("/sms/send")
     public ResponseEntity<Void> sendSms(@RequestBody SmsRequest request) {
         System.out.println("External API: Received SMS request for " + request.to());
@@ -42,6 +44,18 @@ public class ExternalApiController {
         System.out.println("External API: Geocoding request for " + address);
         return geocodingService.getCoordinates(address)
                 .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/geo/reverse")
+    public ResponseEntity<AddressResult> reverseGeocode(
+            @RequestParam Double lat,
+            @RequestParam Double lon) {
+
+        System.out.println("External API: Geocoding request for " + lat + ", " + lon);
+
+        return geocodingService.getAddress(lat, lon)
+                .map(addr -> ResponseEntity.ok(new AddressResult(addr)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
