@@ -21,7 +21,7 @@ import java.util.Collections;
 @Configuration
 public class SecurityConfig {
 
-    @Value("{$app.api-key}")
+    @Value("${app.api-key}")
     private String validApiKey;
 
     @Bean
