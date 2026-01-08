@@ -17,3 +17,6 @@ nominatim:
 ors:
   api-key: eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjJlNTMxMWIzOWRmODRjMDZhYjc1ZmJlYzU2ZDRjNGUxIiwiaCI6Im11cm11cjY0In0=
   base-url: "https://api.openrouteservice.org/v2/directions/driving-car"
+
+app:
+  api-key: "streetfoodgo-api-key"
